@@ -1,0 +1,25 @@
+# Maven
+target/
+
+# Logs
+*.log
+
+# IDEs and Editors
+.idea/
+*.iml
+.ipr
+.iws
+.classpath
+.project
+.settings/
+.vscode/
+bin/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker local volumes
+docker/postgres/data/
+docker/pgadmin/
+

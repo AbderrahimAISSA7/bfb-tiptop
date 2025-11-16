@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/thetiptop
+    username: tiptop
+    password: tiptop
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: thetiptop
+  flyway:
+    enabled: true
+    default-schema: thetiptop
+    schemas: thetiptop
+    locations: classpath:db/migration
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+
