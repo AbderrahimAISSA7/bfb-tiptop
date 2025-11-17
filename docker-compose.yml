@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   postgres:
-    image: postgres:16
+    image: postgres:15
     container_name: thetiptop-postgres
     environment:
       POSTGRES_DB: thetiptop
@@ -22,7 +22,7 @@ services:
     image: dpage/pgadmin4:8
     container_name: thetiptop-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@thetiptop.local
+      PGADMIN_DEFAULT_EMAIL: admin@thetiptop.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "8081:80"
@@ -31,3 +31,17 @@ services:
     volumes:
       - ./docker/pgadmin:/var/lib/pgadmin
 
+  api:
+    build: .
+    container_name: thetiptop-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/thetiptop
+      SPRING_DATASOURCE_USERNAME: tiptop
+      SPRING_DATASOURCE_PASSWORD: tiptop
+      TIPTOP_SECURITY_JWT_SECRET: S3cr3tKey-Change-Me-Please-1234567890
+    ports:
+      - "8080:8080"

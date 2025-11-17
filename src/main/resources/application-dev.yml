@@ -22,3 +22,8 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
 
+tiptop:
+  security:
+    jwt:
+      secret: "S3cr3tKey-Change-Me-Please-1234567890"
+      expiration: 3600 # seconds

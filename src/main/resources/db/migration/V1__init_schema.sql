@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS thetiptop.users (
     email_verified_at   TIMESTAMPTZ,
     sex                 VARCHAR(10),
     age                 INTEGER,
+    role                VARCHAR(20) NOT NULL DEFAULT 'USER',
     deleted_at          TIMESTAMPTZ,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -79,3 +80,4 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON thetiptop.users (email);
 CREATE INDEX IF NOT EXISTS idx_codes_code ON thetiptop.codes (code);
 CREATE INDEX IF NOT EXISTS idx_participations_user_id ON thetiptop.participations (user_id);
 CREATE INDEX IF NOT EXISTS idx_participations_code_id ON thetiptop.participations (code_id);
+

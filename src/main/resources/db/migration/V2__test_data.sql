@@ -8,11 +8,11 @@ VALUES
     ('Coupon Remise', 'Coupon de réduction -20%', 'coupon.png', NOW(), NOW());
 
 -- Users
-INSERT INTO thetiptop.users (first_name, last_name, email, password, created_at, updated_at)
+INSERT INTO thetiptop.users (first_name, last_name, email, password, role, created_at, updated_at)
 VALUES
-    ('Alice', 'Durand', 'alice@example.com', '$2a$10$tiptopalicehash', NOW(), NOW()),
-    ('Bruno', 'Martin', 'bruno@example.com', '$2a$10$tiptopbrunohash', NOW(), NOW()),
-    ('Chloe', 'Bernard', 'chloe@example.com', '$2a$10$tiptopchloehash', NOW(), NOW());
+    ('Alice', 'Durand', 'alice@example.com', '$2a$10$MDMr8TWLkFIW5LBMJ6BDIexiFji49rvtRHyOWFfLntRcfV5.4UN/S', 'ADMIN', NOW(), NOW()),
+    ('Bruno', 'Martin', 'bruno@example.com', '$2a$10$4xPcZPF7.2Sq7eF1NPCAsu387X9MkfbRivKpJjC9v7hLTdST8t2uW', 'USER', NOW(), NOW()),
+    ('Chloe', 'Bernard', 'chloe@example.com', '$2a$10$Cra0uZuhaUTuHqj./hrzne8wYMFH7Q3HEjcnKp/EIX6zJNgiQ4Vbe', 'USER', NOW(), NOW());
 
 -- Concours
 INSERT INTO thetiptop.concours (start_date, end_date, winner_id, created_at, updated_at)

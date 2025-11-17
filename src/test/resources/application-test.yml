@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:thetiptop;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS thetiptop
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        default_schema: thetiptop
+  flyway:
+    enabled: false
+
+tiptop:
+  security:
+    jwt:
+      secret: "TestSecretKey-For-Unit-Tests-Only-1234567890"
+      expiration: 600

@@ -11,5 +11,6 @@ public interface CodeRepository extends JpaRepository<Code, Long> {
     Optional<Code> findByCode(String code);
 
     List<Code> findByStatus(String status);
-}
 
+    long countByStatus(String status);
+}

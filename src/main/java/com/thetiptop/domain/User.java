@@ -50,6 +50,9 @@ public class User {
     @Column(name = "age")
     private Integer age;
 
+    @Column(name = "role")
+    private String role;
+
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
@@ -155,6 +158,14 @@ public class User {
         this.age = age;
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public OffsetDateTime getDeletedAt() {
         return deletedAt;
     }
@@ -179,4 +190,3 @@ public class User {
         this.updatedAt = updatedAt;
     }
 }
-
