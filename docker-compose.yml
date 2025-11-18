@@ -45,3 +45,14 @@ services:
       TIPTOP_SECURITY_JWT_SECRET: S3cr3tKey-Change-Me-Please-1234567890
     ports:
       - "8080:8080"
+
+  frontend:
+    build:
+      context: ../tiptop-font
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    container_name: thetiptop-frontend
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
