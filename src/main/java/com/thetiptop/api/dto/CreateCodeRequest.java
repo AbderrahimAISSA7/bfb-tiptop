@@ -16,7 +16,7 @@ public class CreateCodeRequest {
 
     private String status;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private OffsetDateTime expirationDate;
 
     public String getCode() {
