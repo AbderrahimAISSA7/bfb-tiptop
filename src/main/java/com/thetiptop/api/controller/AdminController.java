@@ -1,20 +1,34 @@
 package com.thetiptop.api.controller;
 
+import com.thetiptop.api.dto.AdminCodeDto;
+import com.thetiptop.api.dto.AdminUserDto;
+import com.thetiptop.api.dto.CreateCodeRequest;
 import com.thetiptop.api.dto.ParticipantSummaryDto;
+import com.thetiptop.api.dto.PrizeDto;
 import com.thetiptop.api.dto.StatsResponse;
+import com.thetiptop.api.dto.UpdateCodeStatusRequest;
+import com.thetiptop.api.dto.UpdateUserRoleRequest;
 import com.thetiptop.api.mapper.DtoMapper;
+import com.thetiptop.service.AdminManagementService;
 import com.thetiptop.service.ParticipationService;
 import com.thetiptop.service.StatsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -25,11 +39,16 @@ public class AdminController {
     private final StatsService statsService;
     private final ParticipationService participationService;
     private final DtoMapper mapper;
+    private final AdminManagementService adminManagementService;
 
-    public AdminController(StatsService statsService, ParticipationService participationService, DtoMapper mapper) {
+    public AdminController(StatsService statsService,
+                           ParticipationService participationService,
+                           DtoMapper mapper,
+                           AdminManagementService adminManagementService) {
         this.statsService = statsService;
         this.participationService = participationService;
         this.mapper = mapper;
+        this.adminManagementService = adminManagementService;
     }
 
     @GetMapping("/stats")
@@ -46,4 +65,42 @@ public class AdminController {
         return participationService.getParticipants(pageable)
                 .map(mapper::toParticipantSummaryDto);
     }
+
+    @GetMapping("/users")
+    @Operation(summary = "Lister les utilisateurs")
+    public List<AdminUserDto> users() {
+        return adminManagementService.listUsers();
+    }
+
+    @PatchMapping("/users/{userId}/role")
+    @Operation(summary = "Mettre à jour le rôle d'un utilisateur")
+    public AdminUserDto updateUserRole(@PathVariable Long userId, @Valid @RequestBody UpdateUserRoleRequest request) {
+        return adminManagementService.updateUserRole(userId, request);
+    }
+
+    @GetMapping("/codes")
+    @Operation(summary = "Lister les codes")
+    public List<AdminCodeDto> codes() {
+        return adminManagementService.listCodes();
+    }
+
+    @PostMapping("/codes")
+    @Operation(summary = "Créer un nouveau code")
+    public AdminCodeDto createCode(@Valid @RequestBody CreateCodeRequest request) {
+        return adminManagementService.createCode(request);
+    }
+
+    @PatchMapping("/codes/{codeId}/status")
+    @Operation(summary = "Mettre à jour le statut d'un code")
+    public AdminCodeDto updateCodeStatus(@PathVariable Long codeId,
+                                         @Valid @RequestBody UpdateCodeStatusRequest request) {
+        return adminManagementService.updateCodeStatus(codeId, request);
+    }
+
+    @GetMapping("/prizes")
+    @Operation(summary = "Lister les lots disponibles")
+    public List<PrizeDto> prizes() {
+        return adminManagementService.listPrizes();
+    }
 }
+

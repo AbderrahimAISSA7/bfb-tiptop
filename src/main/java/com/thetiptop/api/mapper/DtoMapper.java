@@ -1,5 +1,7 @@
 package com.thetiptop.api.mapper;
 
+import com.thetiptop.api.dto.AdminCodeDto;
+import com.thetiptop.api.dto.AdminUserDto;
 import com.thetiptop.api.dto.CodeDto;
 import com.thetiptop.api.dto.NewsletterDto;
 import com.thetiptop.api.dto.ParticipantSummaryDto;
@@ -28,6 +30,7 @@ public class DtoMapper {
         dto.setAvatar(user.getAvatar());
         dto.setPhone(user.getPhone());
         dto.setCreatedAt(user.getCreatedAt());
+        dto.setRole(user.getRole());
         return dto;
     }
 
@@ -89,6 +92,38 @@ public class DtoMapper {
         dto.setId(newsletter.getId());
         dto.setEmail(newsletter.getEmail());
         dto.setCreatedAt(newsletter.getCreatedAt());
+        return dto;
+    }
+
+    public AdminUserDto toAdminUserDto(User user) {
+        if (user == null) {
+            return null;
+        }
+        AdminUserDto dto = new AdminUserDto();
+        dto.setId(user.getId());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole());
+        dto.setCreatedAt(user.getCreatedAt());
+        return dto;
+    }
+
+    public AdminCodeDto toAdminCodeDto(Code code) {
+        if (code == null) {
+            return null;
+        }
+        AdminCodeDto dto = new AdminCodeDto();
+        dto.setId(code.getId());
+        dto.setCode(code.getCode());
+        dto.setStatus(code.getStatus());
+        dto.setExpirationDate(code.getExpirationDate());
+        dto.setIssueDate(code.getIssueDate());
+        dto.setUseDate(code.getUseDate());
+        dto.setCreatedAt(code.getCreatedAt());
+        dto.setUpdatedAt(code.getUpdatedAt());
+        dto.setPrize(toPrizeDto(code.getPrize()));
+        dto.setValidatedBy(toUserDto(code.getValidatedBy()));
         return dto;
     }
 }

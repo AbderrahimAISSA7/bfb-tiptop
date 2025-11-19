@@ -2,16 +2,14 @@ package com.thetiptop.api.dto;
 
 import java.time.OffsetDateTime;
 
-public class UserDto {
+public class AdminUserDto {
 
     private Long id;
     private String firstName;
     private String lastName;
     private String email;
-    private String avatar;
-    private String phone;
-    private OffsetDateTime createdAt;
     private String role;
+    private OffsetDateTime createdAt;
 
     public Long getId() {
         return id;
@@ -45,20 +43,12 @@ public class UserDto {
         this.email = email;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public String getRole() {
+        return role;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public OffsetDateTime getCreatedAt() {
@@ -67,13 +57,5 @@ public class UserDto {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 }
