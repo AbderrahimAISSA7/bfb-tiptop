@@ -56,6 +56,13 @@ public class AdminManagementService {
         return mapper.toAdminUserDto(userRepository.save(user));
     }
 
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+        userRepository.delete(user);
+    }
+
     @Transactional(readOnly = true)
     public List<AdminCodeDto> listCodes() {
         return codeRepository.findAll()
