@@ -75,7 +75,8 @@ public class SecurityConfig {
                 "https://www.dsp5-archi-f24a-15m-g4-2025.fr",
                 "https://dsp5-archi-f24a-15m-g4-2025.fr",
                 "https://tiptop-front.onrender.com",
-                "https://front-tiptop.onrender.com"
+                "https://front-tiptop.onrender.com",
+                "https://front.dsp5-archi-f24a-15m-g4-2025-akf.fr"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
