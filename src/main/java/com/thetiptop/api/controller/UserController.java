@@ -1,4 +1,4 @@
-﻿package com.thetiptop.api.controller;
+package com.thetiptop.api.controller;
 
 import com.thetiptop.api.dto.UserDto;
 import com.thetiptop.api.mapper.DtoMapper;
