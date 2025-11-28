@@ -1,4 +1,4 @@
-package com.thetiptop.service;
+﻿package com.thetiptop.service;
 
 import com.thetiptop.api.dto.RegisterRequest;
 import com.thetiptop.domain.User;
@@ -55,5 +55,13 @@ public class UserService {
     public User getById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    @Transactional
+    public void deleteAccount(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        userRepository.deleteById(id);
     }
 }
