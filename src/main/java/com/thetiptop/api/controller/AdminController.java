@@ -20,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.List;
 
@@ -55,13 +58,13 @@ public class AdminController {
     }
 
     @GetMapping("/stats")
-    @Operation(summary = "Statistiques globales", description = "Nombre total/utilisé de codes et répartition des gains")
+    @Operation(summary = "Statistiques globales", description = "Nombre total/utilisÃ© de codes et rÃ©partition des gains")
     public StatsResponse stats() {
         return statsService.buildStats();
     }
 
     @GetMapping("/participants")
-    @Operation(summary = "Lister les participants", description = "Retourne les participations paginées")
+    @Operation(summary = "Lister les participants", description = "Retourne les participations paginÃ©es")
     public Page<ParticipantSummaryDto> participants(@RequestParam(defaultValue = "0") int page,
                                                     @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
@@ -76,7 +79,7 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{userId}/role")
-    @Operation(summary = "Mettre à jour le rôle d'un utilisateur")
+    @Operation(summary = "Mettre Ã  jour le rÃ´le d'un utilisateur")
     public AdminUserDto updateUserRole(@PathVariable Long userId, @Valid @RequestBody UpdateUserRoleRequest request) {
         return adminManagementService.updateUserRole(userId, request);
     }
@@ -89,19 +92,32 @@ public class AdminController {
     }
 
     @GetMapping("/codes")
-    @Operation(summary = "Lister les codes")
-    public List<AdminCodeDto> codes() {
-        return adminManagementService.listCodes();
+    @Operation(summary = "Lister les codes (fenêtrage offset/limit)")
+    public List<AdminCodeDto> codes(@RequestParam(value = "q", defaultValue = "") String query,
+                                    @RequestParam(value = "offset", defaultValue = "0") int offset,
+                                    @RequestParam(value = "limit", defaultValue = "500") int limit) {
+        return adminManagementService.listCodesSlice(query, offset, limit);
+    }
+
+    @GetMapping("/codes/export")
+    @Operation(summary = "Exporter tous les codes (JSON streaming)")
+    public ResponseEntity<StreamingResponseBody> exportCodes(@RequestParam(value = "q", defaultValue = "") String query,
+                                                             @RequestParam(value = "status", required = false) String status) {
+        StreamingResponseBody body = outputStream -> adminManagementService.writeCodesJson(outputStream, query, status);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Content-Disposition", "attachment; filename=\"codes.json\"")
+                .body(body);
     }
 
     @PostMapping("/codes")
-    @Operation(summary = "Créer un nouveau code")
+    @Operation(summary = "CrÃ©er un nouveau code")
     public AdminCodeDto createCode(@Valid @RequestBody CreateCodeRequest request) {
         return adminManagementService.createCode(request);
     }
 
     @PatchMapping("/codes/{codeId}/status")
-    @Operation(summary = "Mettre à jour le statut d'un code")
+    @Operation(summary = "Mettre Ã  jour le statut d'un code")
     public AdminCodeDto updateCodeStatus(@PathVariable Long codeId,
                                          @Valid @RequestBody UpdateCodeStatusRequest request) {
         return adminManagementService.updateCodeStatus(codeId, request);
@@ -113,4 +129,5 @@ public class AdminController {
         return adminManagementService.listPrizes();
     }
 }
+
 

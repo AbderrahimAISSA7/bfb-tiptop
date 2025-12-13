@@ -13,6 +13,9 @@ import com.thetiptop.domain.User;
 import com.thetiptop.repository.CodeRepository;
 import com.thetiptop.repository.PrizeRepository;
 import com.thetiptop.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.StringJoiner;
+import java.nio.charset.StandardCharsets;
+import java.io.OutputStream;
+import java.io.IOException;
 
 @Service
 public class AdminManagementService {
@@ -64,11 +71,22 @@ public class AdminManagementService {
     }
 
     @Transactional(readOnly = true)
-    public List<AdminCodeDto> listCodes() {
-        return codeRepository.findAll()
-                .stream()
-                .map(mapper::toAdminCodeDto)
-                .toList();
+    public Page<AdminCodeDto> listCodes(Pageable pageable, String query) {
+        String search = (query == null) ? "" : query.trim();
+        Page<Code> page = StringUtils.hasText(search)
+                ? codeRepository.findByCodeContainingIgnoreCase(search, pageable)
+                : codeRepository.findAll(pageable);
+        return page.map(mapper::toAdminCodeDto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminCodeDto> listCodesNoPage(String query, int limit) {
+        String search = (query == null) ? "" : query.trim();
+        Pageable pageable = PageRequest.of(0, Math.max(1, Math.min(limit, 500)));
+        Page<Code> page = StringUtils.hasText(search)
+                ? codeRepository.findByCodeContainingIgnoreCase(search, pageable)
+                : codeRepository.findAll(pageable);
+        return page.stream().map(mapper::toAdminCodeDto).toList();
     }
 
     @Transactional
@@ -102,5 +120,129 @@ public class AdminManagementService {
                 .stream()
                 .map(mapper::toPrizeDto)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminCodeDto> listCodesNoPage(String query, int limit) {
+        String search = (query == null) ? "" : query.trim();
+        int safeLimit = Math.max(1, Math.min(limit, 500));
+        Pageable pageable = PageRequest.of(0, safeLimit);
+        Page<Code> page = StringUtils.hasText(search)
+                ? codeRepository.findByCodeContainingIgnoreCase(search, pageable)
+                : codeRepository.findAll(pageable);
+        return page.stream().map(mapper::toAdminCodeDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminCodeDto> listCodesSlice(String query, int offset, int limit) {
+        String search = (query == null) ? "" : query.trim();
+        int safeLimit = Math.max(1, Math.min(limit, 500));
+        int safeOffset = Math.max(0, offset);
+        int pageIndex = safeOffset / safeLimit;
+        Pageable pageable = PageRequest.of(pageIndex, safeLimit);
+        Page<Code> page = StringUtils.hasText(search)
+                ? codeRepository.findByCodeContainingIgnoreCase(search, pageable)
+                : codeRepository.findAll(pageable);
+        return page.stream().map(mapper::toAdminCodeDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public void writeCodesCsv(OutputStream outputStream, String query, String status) throws IOException {
+        final String search = (query == null) ? "" : query.trim();
+        final boolean hasStatus = StringUtils.hasText(status);
+        final int batchSize = 5000;
+
+        // en-tête
+        outputStream.write("id,code,status,prize,expirationDate,createdAt\n".getBytes(StandardCharsets.UTF_8));
+
+        int pageIndex = 0;
+        Page<Code> page;
+        do {
+            Pageable pageable = PageRequest.of(pageIndex, batchSize);
+            if (StringUtils.hasText(search) && hasStatus) {
+                page = codeRepository.findByCodeContainingIgnoreCaseAndStatus(search, status, pageable);
+            } else if (StringUtils.hasText(search)) {
+                page = codeRepository.findByCodeContainingIgnoreCase(search, pageable);
+            } else if (hasStatus) {
+                page = codeRepository.findByStatus(status, pageable);
+            } else {
+                page = codeRepository.findAll(pageable);
+            }
+
+            StringJoiner joiner = new StringJoiner("\n");
+            page.forEach(code -> joiner.add(String.format("%d,%s,%s,%s,%s,%s",
+                    code.getId(),
+                    escapeCsv(code.getCode()),
+                    escapeCsv(code.getStatus()),
+                    escapeCsv(code.getPrize() != null ? code.getPrize().getName() : ""),
+                    code.getExpirationDate() != null ? code.getExpirationDate() : "",
+                    code.getCreatedAt() != null ? code.getCreatedAt() : "")));
+
+            outputStream.write(joiner.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            pageIndex++;
+        } while (page.hasNext());
+    }
+
+    @Transactional(readOnly = true)
+    public void writeCodesJson(OutputStream outputStream, String query, String status) throws IOException {
+        final String search = (query == null) ? "" : query.trim();
+        final boolean hasStatus = StringUtils.hasText(status);
+        final int batchSize = 5000;
+        outputStream.write("[".getBytes(StandardCharsets.UTF_8));
+        boolean first = true;
+        int pageIndex = 0;
+        Page<Code> page;
+        do {
+            Pageable pageable = PageRequest.of(pageIndex, batchSize);
+            if (StringUtils.hasText(search) && hasStatus) {
+                page = codeRepository.findByCodeContainingIgnoreCaseAndStatus(search, status, pageable);
+            } else if (StringUtils.hasText(search)) {
+                page = codeRepository.findByCodeContainingIgnoreCase(search, pageable);
+            } else if (hasStatus) {
+                page = codeRepository.findByStatus(status, pageable);
+            } else {
+                page = codeRepository.findAll(pageable);
+            }
+
+            for (Code code : page) {
+                if (!first) {
+                    outputStream.write(",".getBytes(StandardCharsets.UTF_8));
+                }
+                first = false;
+                String json = String.format(
+                        "{\"id\":%d,\"code\":\"%s\",\"status\":\"%s\",\"prize\":\"%s\",\"expirationDate\":\"%s\",\"createdAt\":\"%s\"}",
+                        code.getId(),
+                        jsonEscape(code.getCode()),
+                        jsonEscape(code.getStatus()),
+                        jsonEscape(code.getPrize() != null ? code.getPrize().getName() : ""),
+                        code.getExpirationDate() != null ? code.getExpirationDate() : "",
+                        code.getCreatedAt() != null ? code.getCreatedAt() : ""
+                );
+                outputStream.write(json.getBytes(StandardCharsets.UTF_8));
+            }
+            outputStream.flush();
+            pageIndex++;
+        } while (page.hasNext());
+        outputStream.write("]".getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) return "";
+        String v = value.replace("\"", "\"\"");
+        if (v.contains(",") || v.contains("\"") || v.contains("\n")) {
+            return "\"" + v + "\"";
+        }
+        return v;
+    }
+
+    private String jsonEscape(String value) {
+        if (value == null) return "";
+        return value.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 }

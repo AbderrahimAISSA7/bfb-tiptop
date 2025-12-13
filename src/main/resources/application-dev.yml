@@ -3,6 +3,11 @@ spring:
     url: jdbc:postgresql://localhost:5432/thetiptop
     username: tiptop
     password: tiptop
+  data:
+    web:
+      pageable:
+        default-page-size: 100
+        max-page-size: 200
   jpa:
     hibernate:
       ddl-auto: validate
