@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,6 +33,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -90,8 +93,10 @@ public class AdminController {
 
     @GetMapping("/codes")
     @Operation(summary = "Lister les codes")
-    public List<AdminCodeDto> codes() {
-        return adminManagementService.listCodes();
+    public List<AdminCodeDto> codes(@RequestParam(name = "q", defaultValue = "") String query,
+                                    @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                    @RequestParam(name = "limit", defaultValue = "500") int limit) {
+        return adminManagementService.listCodesSlice(query, offset, limit);
     }
 
     @PostMapping("/codes")
@@ -112,5 +117,14 @@ public class AdminController {
     public List<PrizeDto> prizes() {
         return adminManagementService.listPrizes();
     }
-}
 
+    @GetMapping(value = "/codes/export", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Exporter les codes (JSON)")
+    public void exportCodesJson(HttpServletResponse response,
+                                @RequestParam(name = "q", defaultValue = "") String query,
+                                @RequestParam(name = "status", required = false) String status) throws IOException {
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        adminManagementService.writeCodesJson(response.getOutputStream(), query, status);
+    }
+}
